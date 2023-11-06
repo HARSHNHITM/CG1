@@ -18,6 +18,6 @@ glutInit(&argc, argv); //To initialize GLUT library
 glutInitWindowSize(1000,650);
 glutInitWindowPosition(200,200);
 glutCreateWindow("Simple line"); //To name the Output window
-glutDisplayFunc(display); //To set the display callback to current window
-glutMainLoop(); //To call the display in Loop
+glutDisplayFunc(display); 
+glutMainLoop();
 }
