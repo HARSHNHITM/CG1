@@ -1,105 +1,71 @@
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <GL/glut.h>
-#include <math.h>
-double parr[8];
-void init() {
-    glClearColor(0, 0, 0, 1);
+#include <stdlib.h>
+
+void init(void) {
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+}
+
+void drawBitmapText(const char* string, float x, float y, float z) {
+    const char* c;
+    glRasterPos3f(x, y, z);
+    for (c = string; *c != '\0'; c++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
+    }
+}
+
+void draw(GLfloat ctrlpoints[4][3]) {
+    glShadeModel(GL_FLAT);
+    glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &ctrlpoints[0][0]);
+    glEnable(GL_MAP1_VERTEX_3);
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i <= 30; i++) {
+        glEvalCoord1f((GLfloat)i/30.0);
+    }
+    glEnd();
+}
+
+void display(void) {
+    GLfloat ctrlpoints[4][3] = {
+        { -0.0, 2.0, 0.0 },
+        { -2.0, 2.0, 0.0 },
+        { -2.0, -1.0, 0.0 },
+        { -0.0, -1.0, 0.0 }
+    };
+    glClear(GL_COLOR_BUFFER_BIT);
+    draw(ctrlpoints);
+    glColor3f(1, 0, 0);
+    drawBitmapText("Bezier Curves Implementation", -1.00, -3.0, 0);
+    glFlush();
+}
+
+void reshape(int w, int h) {
+    glViewport(0, 0, (GLsizei)w, (GLsizei)h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-500, 500, -500, 500);
-    parr[0] = 10;
-    parr[1] = 10;
-    parr[2] = 200;
-    parr[3] = 10;
-    parr[4] = 200;
-    parr[5] = 200;
-    parr[6] = 10;
-    parr[7] = 200;
-}
-double degreeToRad(double deg) {
-    return M_PI * (deg / 180); // Use M_PI from math.h
-}
-void polygon() {
-    glColor3f(1, 0, 0);
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < 8; i += 2) {
-        glVertex2f(parr[i], parr[i + 1]);
+
+    if (w <= h) {
+        glOrtho(-5.0, 5.0, -5.0 * (GLfloat)h / (GLfloat)w, 5.0 * (GLfloat)h / (GLfloat)w, -5.0, 5.0);
+    } else {
+        glOrtho(-5.0 * (GLfloat)w / (GLfloat)h, 5.0 * (GLfloat)w / (GLfloat)h, -5.0, 5.0, -5.0, 5.0);
     }
-    glEnd();
-    glFlush();
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 }
-void drawCoordinates() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1, 1, 1);
-    glPointSize(4);
-    glBegin(GL_LINES);
-    glVertex2f(-500, 0);
-    glVertex2f(500, 0);
-    glVertex2f(0, 500);
-    glVertex2f(0, -500);
-    glEnd();
-    glColor3f(1, 0, 0);
-    glBegin(GL_POINTS);
-    glVertex2f(0, 0);
-    glEnd();
-    glFlush();
-}
-void translate2d() {
-    int x = 40, y = 50;
-    for (int i = 0; i < 8; i += 2) {
-        parr[i] += x;
-    }
-    for (int i = 1; i < 8; i += 2) {
-        parr[i] += y;
-    }
-    polygon();
-}
-void rotation() {
-    double angle = 180;
-    double rad = degreeToRad(angle);
-    for (int i = 0; i < 8; i += 2) {
-        double x = parr[i] * cos(rad) - parr[i + 1] * sin(rad);
-        double y = parr[i] * sin(rad) + parr[i + 1] * cos(rad);
-        parr[i] = x;
-        parr[i + 1] = y;
-    }
-    polygon();
-}
-void scaling2d() {
-    double x = 2.0, y = 2.0;
-    for (int i = 0; i < 8; i += 2) {
-        parr[i] *= x;
-    }
-    for (int i = 1; i < 8; i += 2) {
-        parr[i] *= y;
-    }
-    polygon();
-}
-void menu(int ch) {
-    drawCoordinates();
-    switch (ch) {
-        case 1: polygon();
-                break;
-        case 2: translate2d();
-                break;
-        case 3: scaling2d();
-                break;
-        case 4: rotation();
-                break;
-    }
-}
+
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glutInitWindowSize(500, 500);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("2D Transformation");
+    glutCreateWindow("Bezier Curve");
     init();
-    glutDisplayFunc(drawCoordinates);
-    glutCreateMenu(menu);
-    glutAddMenuEntry("1 Display Polygon", 1);
-    glutAddMenuEntry("2 Translate", 2);
-    glutAddMenuEntry("3 Scaling", 3);
-    glutAddMenuEntry("4 Rotation", 4);
-    glutAttachMenu(GLUT_RIGHT_BUTTON); 
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
     glutMainLoop();
+
     return 0;
 }

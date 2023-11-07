@@ -1,211 +1,105 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "GL/freeglut.h"
-#include "GL/gl.h"
+#include <GL/glut.h>
 #include <math.h>
-#include<ctype.h>
-float tx, ty, sx, sy, theta=50;
-int choice, n, vertex, shx, shy;
-float xd[10], yd[10], X1[10], Y1[10];
-float WlengthX, WlengthY;
-float VlengthX, VlengthY;
-float WXMax=600, WXMin=100, WYMax=600, WYMin=100;
-float VXMax=800, VXMin=600, VYMax=800, VYMin=200, VX[10], VY[10], VX1[10], VY1[10];
-float SX, SY, TX, TY;
-void initt() {
-glClearColor(0,0,0,0.0);
-glMatrixMode (GL_PROJECTION);
-gluOrtho2D(-1000,1000,-1000,1000);
+double parr[8];
+void init() {
+    glClearColor(0, 0, 0, 1);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-500, 500, -500, 500);
+    parr[0] = 10;
+    parr[1] = 10;
+    parr[2] = 200;
+    parr[3] = 10;
+    parr[4] = 200;
+    parr[5] = 200;
+    parr[6] = 10;
+    parr[7] = 200;
 }
-void translation(){
-int i;
-for(i=1; i<=vertex; i++){
-X1[i]=xd[i]+tx;
-Y1[i]=yd[i]+ty;
+double degreeToRad(double deg) {
+    return M_PI * (deg / 180); // Use M_PI from math.h
 }
+void polygon() {
+    glColor3f(1, 0, 0);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < 8; i += 2) {
+        glVertex2f(parr[i], parr[i + 1]);
+    }
+    glEnd();
+    glFlush();
 }
-void scaling(){
-float xh[10], yh[10];
-int i=1;
-for(i=1; i<=vertex; i++){
-xh[i]=xd[i]-xd[1];
-yh[i]=yd[i]-yd[1];
+void drawCoordinates() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1, 1, 1);
+    glPointSize(4);
+    glBegin(GL_LINES);
+    glVertex2f(-500, 0);
+    glVertex2f(500, 0);
+    glVertex2f(0, 500);
+    glVertex2f(0, -500);
+    glEnd();
+    glColor3f(1, 0, 0);
+    glBegin(GL_POINTS);
+    glVertex2f(0, 0);
+    glEnd();
+    glFlush();
 }
-for(i=1; i<=vertex; i++){
-xh[i]=xh[i]*sx;
-yh[i]=yh[i]*sy;
+void translate2d() {
+    int x = 40, y = 50;
+    for (int i = 0; i < 8; i += 2) {
+        parr[i] += x;
+    }
+    for (int i = 1; i < 8; i += 2) {
+        parr[i] += y;
+    }
+    polygon();
 }
-for(i=1; i<=vertex; i++){
-X1[i]=xh[i]+2*xd[1];
-Y1[i]=yh[i]+yd[1];
+void rotation() {
+    double angle = 180;
+    double rad = degreeToRad(angle);
+    for (int i = 0; i < 8; i += 2) {
+        double x = parr[i] * cos(rad) - parr[i + 1] * sin(rad);
+        double y = parr[i] * sin(rad) + parr[i + 1] * cos(rad);
+        parr[i] = x;
+        parr[i + 1] = y;
+    }
+    polygon();
 }
+void scaling2d() {
+    double x = 2.0, y = 2.0;
+    for (int i = 0; i < 8; i += 2) {
+        parr[i] *= x;
+    }
+    for (int i = 1; i < 8; i += 2) {
+        parr[i] *= y;
+    }
+    polygon();
 }
-void worldWindow()
-{
-int i;
-glClear(GL_COLOR_BUFFER_BIT);
-glColor3f(0.0, 1.0, 0.0);
-if(vertex==2){
-
-glBegin(GL_LINES);
-for(i=1;i<=vertex;i++){
-
-glVertex2f(xd[i], yd[i]);
+void menu(int ch) {
+    drawCoordinates();
+    switch (ch) {
+        case 1: polygon();
+                break;
+        case 2: translate2d();
+                break;
+        case 3: scaling2d();
+                break;
+        case 4: rotation();
+                break;
+    }
 }
-
-}
-else{
-glBegin(GL_POLYGON);
-for(i=1;i<=vertex;i++){
-glVertex2f(xd[i], yd[i]);
-}
-}
-glEnd();
-glColor3f(1.0, 0.0, 1.0);
-if(vertex==2){
-glBegin(GL_LINES);
-for(i=1; i<=vertex; i++)
-{
-glVertex2f(X1[i], Y1[i]);
-}
-}
-else{
-glBegin(GL_POLYGON);
-for(i=1; i<=vertex; i++){
-glVertex2f(X1[i], Y1[i]);
-}
-}
-glEnd();
-glutSwapBuffers();
-glFlush();
-}
-void viewPort(){
-int i;
-glClear(GL_COLOR_BUFFER_BIT);
-glColor3f(0.0, 1.0, 0.0);
-if(vertex==2){
-
-glBegin(GL_LINES);
-for(i=1;i<=vertex;i++){
-glVertex2f(VX[i], VY[i]);
-
-}
-}
-else{
-
-glBegin(GL_POLYGON);
-for(i=1;i<=vertex;i++){
-glVertex2f(VX[i], VY[i]);
-
-}
-}
-glEnd();
-glColor3f(1.0, 0.0, 1.0);
-if(vertex==2){
-
-glBegin(GL_LINES);
-for(i=1; i<=vertex; i++){
-glVertex2f(VX1[i], VY1[i]);
-
-}
-}
-else{
-
-glBegin(GL_POLYGON);
-for(i=1;i<=vertex;i++){
-
-glVertex2f(VX1[i], VY1[i]);
-
-}
-}
-glEnd();
-glutSwapBuffers();
-glFlush();
-}
-float scalingX(float WXMax, float WXMin, float VXMax, float VXMin)
-{
-float sx = (VXMax - VXMin)/(WXMax - WXMin);
-return sx;
-}
-float scalingY(float WYMax, float WYMin, float VYMax, float VYMin)
-{
-float sy = (VYMax - VYMin)/(WYMax - WYMin);
-return sy;
-}
-float transX(float WXMax, float WXMin, float VXMax, float VXMin)
-{
-float tx = ((WXMax * VXMin) - (WXMin * VXMax))/(WXMax - WXMin);
-return tx;
-}
-float transY(float WYMax, float WYMin, float VYMax, float VYMin)
-{
-float ty = ((WYMax * VYMin) - (WYMin * VYMax))/(WYMax - WYMin);
-return ty;
-}
-void operation(GLubyte key, GLint x, GLint y)
-{
-float currentX, currentY;
-switch(key)
-{
-case 97: translation();
-
-glutPostRedisplay();
-break;
-case 98: scaling();
-glutPostRedisplay();
-break;
-
-}
-}
-int main(int argc, char **argv)
-{
-int i;
-printf("ENTER NO. OF VERTICES(max=10):-\n");
-scanf("%d",&vertex);
-if(vertex<2 || vertex>10)
-{
-printf("Invalid Input......Exiting......\n");
-exit(0);
-}
-for(i=1; i<=vertex; i++){
-printf("Enter coordinates(x,y):-\n");
-scanf("%f %f", &xd[i], &yd[i]);
-}
-
-WlengthX = WXMax - WXMin;
-WlengthY = WYMax - WYMin;
-VlengthX = VXMax - VXMin;
-VlengthY = VYMax - VYMin;
-printf("Translation Factors:- ");
-scanf("%f %f",&tx,&ty);
-printf("Scaling Factors:- ");
-scanf("%f %f",&sx,&sy);
-glutInit(&argc, argv);
-glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-glutInitWindowSize(WlengthX, WlengthY);
-glutInitWindowPosition(WXMin, WYMin);
-glutCreateWindow("2D TRANSFORMATION ");
-initt();
-glutDisplayFunc(worldWindow);
-glutKeyboardFunc(operation);
-SX = scalingX(WXMax, WXMin, VXMax, VXMin);
-SY = scalingY(WYMax, WYMin, VYMax, VYMin);
-TX = transX(WXMax, WXMin, VXMax, VXMin);
-TY = transY(WYMax, WYMin, VYMax, VYMin);
-for(i=1; i<=vertex; i++)
-{
-VX[i] = SX * xd[i] + TX;
-VY[i] = SY * yd[i] + TY;
-VX1[i] = SX * X1[i] + TX;
-VY1[i] = SY * Y1[i] + TY;
-
-}
-glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-glutInitWindowSize(VlengthX, VlengthY);
-glutInitWindowPosition(VXMin, VYMin);
-glutCreateWindow("OpenGL - View Port Transformation");
-initt();
-glutDisplayFunc(viewPort);
-glutMainLoop();
-return 0;
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("2D Transformation");
+    init();
+    glutDisplayFunc(drawCoordinates);
+    glutCreateMenu(menu);
+    glutAddMenuEntry("1 Display Polygon", 1);
+    glutAddMenuEntry("2 Translate", 2);
+    glutAddMenuEntry("3 Scaling", 3);
+    glutAddMenuEntry("4 Rotation", 4);
+    glutAttachMenu(GLUT_RIGHT_BUTTON); 
+    glutMainLoop();
+    return 0;
 }

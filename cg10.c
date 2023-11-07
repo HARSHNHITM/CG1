@@ -1,230 +1,133 @@
 #include <GL/gl.h>
-
 #include <GL/glut.h>
-#include <stdlib.h>
- 
-int i;
- 
-// Function to initialize the Beizer
-// curve pointer
-void init(void)
-{
-    glClearColor(1.0, 1.0, 1.0, 1.0);
-}
- 
-// Function to draw the Bitmap Text
-void drawBitmapText(char* string, float x,
-                    float y, float z)
-{
-    char* c;
-    glRasterPos2f(x, y);
- 
-    // Traverse the string
-    for (c = string; *c != '\0'; c++) {
-        glutBitmapCharacter(
-            GLUT_BITMAP_TIMES_ROMAN_24, *c);
+#include <math.h>
+#include <stdio.h>
+// Define the initial vertices of a square
+float vertices[][2] = {{-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}, {-0.5, 0.5}};
+
+// Initialize transformation matrix
+float transformationMatrix[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+
+// Function to multiply two 3x3 matrices
+void multiplyMatrix(float A[3][3], float B[3][3]) {
+    float result[3][3] = {{0}};
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            for (int k = 0; k < 3; k++) {
+                result[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            A[i][j] = result[i][j];
+        }
     }
 }
- 
-// Function to draw the shapes
-void draw(GLfloat ctrlpoints[4][3])
-{
-    glShadeModel(GL_FLAT);
-    glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4,
-            &ctrlpoints[0][0]);
- 
-    glEnable(GL_MAP1_VERTEX_3);
- 
-    // Fill the color
-    glColor3f(1.0, 1.0, 1.0);
-    glBegin(GL_LINE_STRIP);
- 
-    // Find the coordinates
-    for (i = 0; i <= 30; i++)
-        glEvalCoord1f((GLfloat)i / 30.0);
- 
+
+// Function to apply transformation matrix to vertices
+void applyTransformation() {
+    for (int i = 0; i < 4; i++) {
+        float x = vertices[i][0];
+        float y = vertices[i][1];
+
+        vertices[i][0] = x * transformationMatrix[0][0] + y * transformationMatrix[0][1] + transformationMatrix[0][2];
+        vertices[i][1] = x * transformationMatrix[1][0] + y * transformationMatrix[1][1] + transformationMatrix[1][2];
+    }
+}
+
+// Function to display the transformed shape
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBegin(GL_POLYGON);
+    glColor3f(1.0, 0.0, 0.0); // Red color
+
+    for (int i = 0; i < 4; i++) {
+        glVertex2f(vertices[i][0], vertices[i][1]);
+    }
+
     glEnd();
     glFlush();
 }
- 
-// Function to display the curved
-// drawn using the Beizer Curve
-void display(void)
-{
-    int i;
- 
-    // Specifying all the control
-    // points through which the
-    // curve will pass
-    GLfloat ctrlpoints[4][3]
-        = { { -0.00, 2.00, 0.0 },
-            { -2.00, 2.00, 0.0 },
-            { -2.00, -1.00, 0.0 },
-            { -0.00, -1.00, 0.0 } };
-    draw(ctrlpoints);
- 
-    GLfloat ctrlpoints2[4][3]
-        = { { 0.0, -1.00, 0.0 },
-            { 0.55, -0.65, 0.0 },
-            { 0.65, -0.25, 0.0 },
-            { 0.00, 0.70, 0.0 } };
- 
-    draw(ctrlpoints2);
-    GLfloat ctrlpoints3[4][3]
-        = { { 0.0, 0.70, 0.0 },
-            { 0.15, 0.70, 0.0 },
-            { 0.25, 0.70, 0.0 },
-            { 0.65, 0.700, 0.0 } };
- 
-    draw(ctrlpoints3);
-    GLfloat ctrlpoints4[4][3]
-        = { { 0.65, 0.70, 0.0 },
-            { 0.65, -0.90, 0.0 },
-            { 0.65, -0.70, 0.0 },
-            { 0.65, -1.00, 0.0 } };
- 
-    draw(ctrlpoints4);
- 
-    GLfloat ctrlpoints5[4][3]
-        = { { 1.00, -1.00, 0.0 },
-            { 1.00, -0.5, 0.0 },
-            { 1.00, -0.20, 0.0 },
-            { 1.00, 1.35, 0.0 } };
- 
-    draw(ctrlpoints5);
-    GLfloat ctrlpoints6[4][3]
-        = { { 1.00, 1.35 },
-            { 1.10, 1.35, 0.0 },
-            { 1.10, 1.35, 0.0 },
-            { 1.90, 1.35, 0.0 } };
- 
-    draw(ctrlpoints6);
-    GLfloat ctrlpoints7[4][3]
-        = { { 1.00, 0.50, 0.0 },
-            { 1.10, 0.5, 0.0 },
-            { 1.10, 0.5, 0.0 },
-            { 1.90, 0.5, 0.0 } };
- 
-    draw(ctrlpoints7);
-    GLfloat ctrlpoints8[4][3]
-        = { { 3.50, 2.00, 0.0 },
-            { 1.50, 2.00, 0.0 },
-            { 1.50, -1.00, 0.0 },
-            { 3.50, -1.00, 0.0 } };
-    draw(ctrlpoints8);
- 
-    GLfloat ctrlpoints9[4][3]
-        = { { 3.50, -1.00, 0.0 },
-            { 4.05, -0.65, 0.0 },
-            { 4.15, -0.25, 0.0 },
-            { 3.50, 0.70, 0.0 } };
-    draw(ctrlpoints9);
- 
-    GLfloat ctrlpoints10[4][3]
-        = { { 3.50, 0.70, 0.0 },
-            { 3.65, 0.70, 0.0 },
-            { 3.75, 0.70, 0.0 },
-            { 4.15, 0.700, 0.0 } };
- 
-    draw(ctrlpoints10);
-    GLfloat ctrlpoints11[4][3]
-        = { { 4.15, 0.70, 0.0 },
-            { 4.15, -0.90, 0.0 },
-            { 4.15, -0.70, 0.0 },
-            { 4.15, -1.00, 0.0 } };
- 
-    draw(ctrlpoints11);
- 
-    GLfloat ctrlpoints12[4][3]
-        = { { -2.0, 2.50, 0.0 },
-            { 2.05, 2.50, 0.0 },
-            { 3.15, 2.50, 0.0 },
-            { 4.65, 2.50, 0.0 } };
- 
-    draw(ctrlpoints12);
- 
-    GLfloat ctrlpoints13[4][3]
-        = { { -2.0, -1.80, 0.0 },
-            { 2.05, -1.80, 0.0 },
-            { 3.15, -1.80, 0.0 },
-            { 4.65, -1.80, 0.0 } };
- 
-    draw(ctrlpoints13);
- 
-    GLfloat ctrlpoints14[4][3]
-        = { { -2.0, -1.80, 0.0 },
-            { -2.0, 1.80, 0.0 },
-            { -2.0, 1.90, 0.0 },
-            { -2.0, 2.50, 0.0 } };
- 
-    draw(ctrlpoints14);
-    GLfloat ctrlpoints15[4][3]
-        = { { 4.650, -1.80, 0.0 },
-            { 4.65, 1.80, 0.0 },
-            { 4.65, 1.90, 0.0 },
-            { 4.65, 2.50, 0.0 } };
- 
-    draw(ctrlpoints15);
- 
-    // Specifying the colour of
-    // text to be displayed
-    glColor3f(1, 0, 0);
-    drawBitmapText("Bezier Curves "
-                   "Implementation",
-                   -1.00, -3.0, 0);
-    glFlush();
+
+// Function to handle key presses for different transformations
+void keyPressed(unsigned char key, int x, int y) {
+    float angle, shearX, shearY; 
+    char axis;
+    switch (key) {
+        case 'R':
+        case 'r':
+            // Rotation
+            printf("Enter the rotation angle (in degrees): ");
+            scanf("%f", &angle);
+            angle = angle * (3.14159265359 / 180.0); // Convert to radians
+            float rotationMatrix[3][3] = {{cos(angle), -sin(angle), 0},
+                                          {sin(angle), cos(angle), 0},
+                                          {0, 0, 1}};
+            multiplyMatrix(transformationMatrix, rotationMatrix);
+            applyTransformation();
+            display();
+            break;
+
+        case 'S':
+        case 's':
+            // Shear
+            printf("Enter the shear factors (X Y): ");
+            scanf("%f %f", &shearX, &shearY);
+            float shearMatrix[3][3] = {{1, shearX, 0},
+                                       {shearY, 1, 0},
+                                       {0, 0, 1}};
+            multiplyMatrix(transformationMatrix, shearMatrix);
+            applyTransformation();
+            display();
+            break;
+
+        case 'F':
+        case 'f':
+            // Reflection
+
+            printf("Enter the reflection axis (X or Y): ");
+            scanf(" %c", &axis);
+
+            if (axis == 'X' || axis == 'x') {
+                float reflectionMatrixX[3][3] = {{1, 0, 0},
+                                                {0, -1, 0},
+                                                {0, 0, 1}};
+                multiplyMatrix(transformationMatrix, reflectionMatrixX);
+            } else if (axis == 'Y' || axis == 'y') {
+                float reflectionMatrixY[3][3] = {{-1, 0, 0},
+                                                {0, 1, 0},
+                                                {0, 0, 1}};
+                multiplyMatrix(transformationMatrix, reflectionMatrixY);
+            }
+            applyTransformation();
+            display();
+            break;
+
+        default:
+            break;
+    }
 }
- 
-// Function perform the reshaping
-// of the curve
-void reshape(int w, int h)
-{
-    glViewport(0, 0, (GLsizei)w,
-               (GLsizei)h);
- 
-    // Matrix mode
+
+
+int main(int argc, char **argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("2D Transformations");
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
- 
-    if (w <= h)
-        glOrtho(-5.0, 5.0, -5.0
-                               * (GLfloat)h / (GLfloat)w,
-                5.0 * (GLfloat)h / (GLfloat)w, -5.0, 5.0);
-    else
-        glOrtho(-5.0 * (GLfloat)w / (GLfloat)h,
-                5.0 * (GLfloat)w / (GLfloat)h,
-                -5.0, 5.0,
-                -5.0, 5.0);
- 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-}
- 
-// Driver Code
-int main(int argc, char** argv)
-{
-    glutInit(&argc, argv);
-    glutInitDisplayMode(
-        GLUT_SINGLE | GLUT_RGB);
- 
-    // Specifies the window size
-    glutInitWindowSize(500, 500);
-    glutInitWindowPosition(100, 100);
- 
-    // Creates the window as
-    // specified by the user
-    glutCreateWindow( "Curve Bezier for n control points");
-    init();
- 
-    // Links display event with the
-    // display event handler(display)
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+
     glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
- 
-    // Loops the current event
+    glutKeyboardFunc(keyPressed);
+
+    printf("Press 'R' for Rotation, 'S' for Shear, 'F' for Reflection\n");
+    printf("Press 'Q' to quit.\n");
+
     glutMainLoop();
- 
+
     return 0;
-}
-
-
